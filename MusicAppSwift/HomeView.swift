@@ -31,7 +31,7 @@ struct HomeView: View {
                                     .font(.caption2.bold())
                                     .foregroundColor(.secondary)
                                 
-                                NavigationLink(destination: NaaAlbumDetailView(albumResult: featured)) {
+                                NavigationLink(destination: AlbumDetailView(album: featured)) {
                                     FeaturedCard(album: featured)
                                 }
                             }
@@ -63,32 +63,42 @@ struct HomeView: View {
                         .foregroundColor(.pink)
                 }
             }
+            .refreshable {
+                await loadData(forceReload: true)
+            }
         }
         .onAppear {
-            loadData()
+            Task {
+                await loadData()
+            }
         }
     }
     
-    private func loadData() {
-        guard latestAlbums.isEmpty else { return }
-        isLoading = true
+    private func loadData(forceReload: Bool = false) async {
+        if !forceReload && !latestAlbums.isEmpty { return }
         
-        Task {
-            do {
-                let allItems = try await NaaSongsService.shared.fetchHomeContent()
-                await MainActor.run {
-                    if !allItems.isEmpty {
-                        self.featuredAlbum = allItems.first
-                        self.latestAlbums = Array(allItems.dropFirst().prefix(10))
-                        self.trendingAlbums = Array(allItems.shuffled().prefix(10))
-                    }
-                    self.isLoading = false
+        await MainActor.run {
+            self.errorMessage = nil
+            if !forceReload { self.isLoading = true }
+        }
+        
+        print("NaaSongs: Fetching home content (forceReload: \(forceReload))...")
+        
+        do {
+            let allItems = try await NaaSongsService.shared.fetchHomeContent()
+            print("NaaSongs: Fetched \(allItems.count) items for home.")
+            await MainActor.run {
+                if !allItems.isEmpty {
+                    self.featuredAlbum = allItems.first
+                    self.latestAlbums = Array(allItems.dropFirst().prefix(10))
+                    self.trendingAlbums = Array(allItems.shuffled().prefix(10))
                 }
-            } catch {
-                await MainActor.run {
-                    self.errorMessage = "Failed to load Home: \(error.localizedDescription)"
-                    self.isLoading = false
-                }
+                self.isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                self.errorMessage = "Failed to load Home: \(error.localizedDescription)"
+                self.isLoading = false
             }
         }
     }
@@ -115,7 +125,7 @@ struct AlbumRowSection: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {
                     ForEach(albums) { album in
-                        NavigationLink(destination: NaaAlbumDetailView(albumResult: album)) {
+                        NavigationLink(destination: AlbumDetailView(album: album)) {
                             AlbumCard(album: album)
                         }
                     }
@@ -150,7 +160,7 @@ struct FeaturedCard: View {
                 .foregroundColor(.primary)
                 .lineLimit(1)
             
-            Text("Latest Telugu Hits")
+            Text("Telugu Songs")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -189,3 +199,4 @@ struct AlbumCard: View {
         }
     }
 }
+

@@ -39,6 +39,7 @@ class NaaSongsService {
         }
         
         var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
         request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X)", forHTTPHeaderField: "User-Agent")
         
         let (data, response) = try await URLSession.shared.data(for: request)

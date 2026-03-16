@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct NaaAlbumDetailView: View {
-    let albumResult: NaaSearchResult
+struct AlbumDetailView: View {
+    let album: NaaSearchResult
     
     @State private var songs: [NaaSong] = []
     @State private var isLoading = true
@@ -24,7 +24,7 @@ struct NaaAlbumDetailView: View {
             if isLoading {
                 HStack {
                     Spacer()
-                    ProgressView("Loading songs...")
+                    ProgressView("Loading songs from NaaSongs...")
                     Spacer()
                 }
                 .listRowBackground(Color.clear)
@@ -87,10 +87,10 @@ struct NaaAlbumDetailView: View {
                 }
             }
         }
-        .navigationTitle(albumResult.title)
+        .navigationTitle(album.title)
         .onAppear {
             loadSongs()
-            LibraryStore.shared.addToRecentlyPlayed(album: albumResult)
+            LibraryStore.shared.addToRecentlyPlayed(album: album)
         }
     }
     
@@ -102,6 +102,7 @@ struct NaaAlbumDetailView: View {
         }
     }
     
+    
     // Subview for the download button/status
     struct DownloadButton: View {
         let song: NaaSong
@@ -109,7 +110,7 @@ struct NaaAlbumDetailView: View {
         @ObservedObject var library = LibraryStore.shared
         
         private var download: DownloadTask? {
-            downloadManager.activeDownloads[song.id]
+            downloadManager.activeDownloads.values.first { $0.song.title == song.title }
         }
         
         private var isDownloaded: Bool {
@@ -158,6 +159,7 @@ struct NaaAlbumDetailView: View {
             }
             .frame(width: 30)
         }
+        
     }
     
     struct CircularProgressView: View {
@@ -186,35 +188,43 @@ struct NaaAlbumDetailView: View {
         
         Task {
             do {
-                let fetchedSongs = try await NaaSongsService.shared.getSongs(from: albumResult.link)
+                let fetchedSongs = try await NaaSongsService.shared.getSongs(from: album.link)
                 await MainActor.run {
                     self.songs = fetchedSongs
                     self.isLoading = false
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load songs: \(error.localizedDescription)"
+                    self.errorMessage = "Failed to load songs from NaaSongs: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
         }
     }
     
-    private func isSongDownloaded(_ naaSong: NaaSong) -> Bool {
-        LibraryStore.shared.songs.contains { $0.title == naaSong.title }
+    private func isSongDownloaded(_ song: NaaSong) -> Bool {
+        LibraryStore.shared.songs.contains { $0.title == song.title }
     }
     
-    private func playNaaSong(_ naaSong: NaaSong) {
-        // Check if already downloaded
-        if let localSong = LibraryStore.shared.songs.first(where: { $0.title == naaSong.title }) {
+    private func playNaaSong(_ song: NaaSong) {
+        if let localSong = LibraryStore.shared.songs.first(where: { $0.title == song.title }) {
             playback.play(song: localSong)
             return
         }
         
-        guard let url = URL(string: naaSong.downloadUrl) else { return }
+        guard let url = URL(string: song.downloadUrl) else { return }
         
-        let artworkURL = naaSong.artworkUrl.flatMap { URL(string: $0) }
-        let newSong = Song(id: UUID(), title: naaSong.title, fileURL: url, artworkURL: artworkURL)
+        let artworkURL = song.artworkUrl.flatMap { URL(string: $0) }
+        let newSong = Song(
+            id: UUID(),
+            title: song.title,
+            artist: "Telugu Hits",
+            album: album.title,
+            fileURL: url,
+            artworkURL: artworkURL
+        )
         playback.play(song: newSong)
     }
 }
+
+

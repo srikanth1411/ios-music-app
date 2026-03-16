@@ -25,8 +25,9 @@
 		7E1A11252B930A5000C2A111 /* AddToPlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11262B930A5000C2A111 /* AddToPlaylistView.swift */; };
 		837CB68E5CEA418B94010572 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = B3FADD8FA5AA43EAA9F39892 /* SwiftSoup */; };
 		DBD38485DBD44D1F03CE2FC2 /* NaaSongsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD36D8DFF7B1A640A1A6D15 /* NaaSongsService.swift */; };
+		DBD38485DBD44D1F03CE2FC4 /* JioSaavnService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD38485DBD44D1F03CE2FC3 /* JioSaavnService.swift */; };
 		EC4FC78B8D522D55ADE6D491 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E56D838333269F702E96E1 /* SearchView.swift */; };
-		EE6F4176A0B356B7DC8B9C02 /* NaaAlbumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF5BC64EF8870FBFD561CE7 /* NaaAlbumDetailView.swift */; };
+		EE6F4176A0B356B7DC8B9C02 /* AlbumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF5BC64EF8870FBFD561CE7 /* AlbumDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		E0B319F50C0C4D07830D0366 /* OfflineSongsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OfflineSongsView.swift; sourceTree = "<group>"; };
 		027705886C214553827B1EA9 /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		4DD36D8DFF7B1A640A1A6D15 /* NaaSongsService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NaaSongsService.swift; sourceTree = "<group>"; };
+		DBD38485DBD44D1F03CE2FC3 /* JioSaavnService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JioSaavnService.swift; sourceTree = "<group>"; };
 		7E1A11002B930A2400C2A111 /* MusicAppSwiftApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicAppSwiftApp.swift; sourceTree = "<group>"; };
 		7E1A11022B930A3500C2A111 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7E1A11042B930A3500C2A111 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
@@ -49,7 +51,7 @@
 		7E1A11242B930A5000C2A111 /* PlaylistDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailView.swift; sourceTree = "<group>"; };
 		7E1A11262B930A5000C2A111 /* AddToPlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToPlaylistView.swift; sourceTree = "<group>"; };
 		A7E56D838333269F702E96E1 /* SearchView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
-		EFF5BC64EF8870FBFD561CE7 /* NaaAlbumDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NaaAlbumDetailView.swift; sourceTree = "<group>"; };
+		EFF5BC64EF8870FBFD561CE7 /* AlbumDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlbumDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,7 +83,8 @@
 				027705886C214553827B1EA9 /* DownloadManager.swift */,
 				7E1A11002B930A2400C2A111 /* MusicAppSwiftApp.swift */,
 				4DD36D8DFF7B1A640A1A6D15 /* NaaSongsService.swift */,
-				EFF5BC64EF8870FBFD561CE7 /* NaaAlbumDetailView.swift */,
+				DBD38485DBD44D1F03CE2FC3 /* JioSaavnService.swift */,
+				EFF5BC64EF8870FBFD561CE7 /* AlbumDetailView.swift */,
 				A7E56D838333269F702E96E1 /* SearchView.swift */,
 				7E1A11022B930A3500C2A111 /* ContentView.swift */,
 				7E1A11042B930A3500C2A111 /* LibraryView.swift */,
@@ -180,7 +183,8 @@
 				6FA83F65C11F45308F467D6B /* DownloadManager.swift in Sources */,
 				7E1A11012B930A2400C2A111 /* MusicAppSwiftApp.swift in Sources */,
 				DBD38485DBD44D1F03CE2FC2 /* NaaSongsService.swift in Sources */,
-				EE6F4176A0B356B7DC8B9C02 /* NaaAlbumDetailView.swift in Sources */,
+				DBD38485DBD44D1F03CE2FC4 /* JioSaavnService.swift in Sources */,
+				EE6F4176A0B356B7DC8B9C02 /* AlbumDetailView.swift in Sources */,
 				EC4FC78B8D522D55ADE6D491 /* SearchView.swift in Sources */,
 				7E1A11032B930A3500C2A111 /* ContentView.swift in Sources */,
 				7E1A11052B930A3500C2A111 /* LibraryView.swift in Sources */,

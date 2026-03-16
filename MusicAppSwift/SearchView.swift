@@ -12,7 +12,7 @@ struct SearchView: View {
                 if isLoading {
                     HStack {
                         Spacer()
-                        ProgressView("Searching...")
+                        ProgressView("Searching NaaSongs...")
                         Spacer()
                     }
                     .listRowBackground(Color.clear)
@@ -20,11 +20,11 @@ struct SearchView: View {
                     Text(errorMessage)
                         .foregroundColor(.red)
                 } else if results.isEmpty && !searchQuery.isEmpty {
-                    Text("No results found.")
+                    Text("No results found on NaaSongs.")
                         .foregroundColor(.secondary)
                 } else {
                     ForEach(results) { result in
-                        NavigationLink(destination: NaaAlbumDetailView(albumResult: result)) {
+                        NavigationLink(destination: AlbumDetailView(album: result)) {
                             HStack {
                                 if let imageUrlString = result.imageUrl, let imageUrl = URL(string: imageUrlString) {
                                     AsyncImage(url: imageUrl) { phase in
@@ -45,15 +45,20 @@ struct SearchView: View {
                                         .cornerRadius(8)
                                 }
                                 
-                                Text(result.title)
-                                    .font(.headline)
+                                VStack(alignment: .leading) {
+                                    Text(result.title)
+                                        .font(.headline)
+                                    Text("Telugu Album") // Default since NaaSongs results don't always have artist here
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
                     }
                 }
             }
-            .navigationTitle("Search Albums")
-            .searchable(text: $searchQuery, prompt: "Search NaaSongs (e.g. telugu)")
+            .navigationTitle("Music Search")
+            .searchable(text: $searchQuery, prompt: "Search NaaSongs (Telugu, etc.)")
             .onSubmit(of: .search) {
                 performSearch()
             }
@@ -79,7 +84,7 @@ struct SearchView: View {
                 }
             } catch {
                 await MainActor.run {
-                    self.errorMessage = "Failed to load results: \(error.localizedDescription)"
+                    self.errorMessage = "NaaSongs Search failed: \(error.localizedDescription)"
                     self.isLoading = false
                 }
             }
