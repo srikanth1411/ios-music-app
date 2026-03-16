@@ -58,9 +58,9 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView {
-                LibraryView()
+                HomeView()
                     .tabItem {
-                        Label("Library", systemImage: "music.note")
+                        Label("Home", systemImage: "house.fill")
                     }
                 
                 PlaylistListView()

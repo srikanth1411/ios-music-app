@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8DC4503024D849DE8127E953 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97BA1BC6E0E5405485B5686D /* HomeView.swift */; };
 		880DD3AD94414E2BAD3DBEF4 /* OfflineSongsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B319F50C0C4D07830D0366 /* OfflineSongsView.swift */; };
 		6FA83F65C11F45308F467D6B /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027705886C214553827B1EA9 /* DownloadManager.swift */; };
 		7E1A11012B930A2400C2A111 /* MusicAppSwiftApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11002B930A2400C2A111 /* MusicAppSwiftApp.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		97BA1BC6E0E5405485B5686D /* HomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		E0B319F50C0C4D07830D0366 /* OfflineSongsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OfflineSongsView.swift; sourceTree = "<group>"; };
 		027705886C214553827B1EA9 /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		4DD36D8DFF7B1A640A1A6D15 /* NaaSongsService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NaaSongsService.swift; sourceTree = "<group>"; };
@@ -71,6 +73,7 @@
 		7E1A10FE2B930A1900C2A111 /* MusicAppSwift */ = {
 			isa = PBXGroup;
 			children = (
+				97BA1BC6E0E5405485B5686D /* HomeView.swift */,
 				E0B319F50C0C4D07830D0366 /* OfflineSongsView.swift */,
 				027705886C214553827B1EA9 /* DownloadManager.swift */,
 				7E1A11002B930A2400C2A111 /* MusicAppSwiftApp.swift */,
@@ -168,6 +171,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8DC4503024D849DE8127E953 /* HomeView.swift in Sources */,
 				880DD3AD94414E2BAD3DBEF4 /* OfflineSongsView.swift in Sources */,
 				6FA83F65C11F45308F467D6B /* DownloadManager.swift in Sources */,
 				7E1A11012B930A2400C2A111 /* MusicAppSwiftApp.swift in Sources */,

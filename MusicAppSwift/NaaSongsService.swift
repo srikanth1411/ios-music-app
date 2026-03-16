@@ -17,6 +17,27 @@ struct NaaSong: Identifiable {
 class NaaSongsService {
     static let shared = NaaSongsService()
     
+    // Scrapes the home page: https://naasongs.com.co/
+    func fetchHomeContent() async throws -> [NaaSearchResult] {
+        guard let url = URL(string: "https://naasongs.com.co/") else {
+            throw URLError(.badURL)
+        }
+        
+        var request = URLRequest(url: url)
+        request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X)", forHTTPHeaderField: "User-Agent")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse,
+              let html = String(data: data, encoding: .utf8) else {
+            print("NaaSongs: Failed to get Home HTML")
+            throw URLError(.badServerResponse)
+        }
+        
+        print("NaaSongs: Home status \(httpResponse.statusCode), body length: \(html.count)")
+        let doc = try SwiftSoup.parse(html)
+        return try parseArticles(from: doc)
+    }
+    
     // Scrapes the search page: https://naasongs.com.co/?s=telugu
     func search(query: String) async throws -> [NaaSearchResult] {
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
@@ -30,16 +51,20 @@ class NaaSongsService {
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               let html = String(data: data, encoding: .utf8) else {
-            print("NaaSongs: Failed to get HTML or response")
+            print("NaaSongs: Failed to get Search HTML or response")
             throw URLError(.badServerResponse)
         }
         
         print("NaaSongs: Search status \(httpResponse.statusCode), body length: \(html.count)")
         
         let doc = try SwiftSoup.parse(html)
+        return try parseArticles(from: doc)
+    }
+
+    private func parseArticles(from doc: Document) throws -> [NaaSearchResult] {
         var results: [NaaSearchResult] = []
         
-        // The theme seems to use <article> tags for search results
+        // The theme seems to use <article> tags for albums
         let articles = try doc.select("article")
         print("NaaSongs: Found \(articles.size()) article tags")
         
@@ -48,7 +73,6 @@ class NaaSongsService {
             if let titleTag = try article.select("h2.entry-title a").first() {
                 let link = try titleTag.attr("href")
                 let titleText = try titleTag.text()
-                print("NaaSongs: Found result: \(titleText) at \(link)")
                 
                 let title = titleText.replacingOccurrences(of: " Songs", with: "").replacingOccurrences(of: " Songs download", with: "")
                 
