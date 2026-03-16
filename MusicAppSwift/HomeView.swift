@@ -104,11 +104,11 @@ struct AlbumRowSection: View {
                 Text(title)
                     .font(.title2.bold())
                 Spacer()
-                Button("See All") { 
-                    // Future: Navigate to full list
+                NavigationLink(destination: FullAlbumListView(title: title, albums: albums)) {
+                    Text("See All")
+                        .font(.subheadline)
+                        .foregroundColor(.pink)
                 }
-                .font(.subheadline)
-                .foregroundColor(.pink)
             }
             .padding(.horizontal)
             
