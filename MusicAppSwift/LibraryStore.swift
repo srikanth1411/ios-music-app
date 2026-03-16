@@ -9,13 +9,25 @@ class LibraryStore: ObservableObject {
     
     private let storageKey = "saved_songs"
     private let playlistsKey = "saved_playlists"
-    private let folderBookmarkKey = "watched_folder_bookmark"
+    private let watchedFolderBookmarkKey = "watched_folder_bookmark"
     private var folderWatcher: DispatchSourceFileSystemObject?
     
+    // Internal directory for downloaded songs
+    var downloadsFolder: URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let downloadsPath = paths[0].appendingPathComponent("Downloads", isDirectory: true)
+        
+        if !FileManager.default.fileExists(atPath: downloadsPath.path) {
+            try? FileManager.default.createDirectory(at: downloadsPath, withIntermediateDirectories: true)
+        }
+        return downloadsPath
+    }
+    
     private init() {
-        loadSongs()
         loadPlaylists()
         loadFolderBookmark()
+        // Always scan both on init
+        refreshLibrary()
     }
     
     func setWatchedFolder(url: URL) {
@@ -25,16 +37,15 @@ class LibraryStore: ObservableObject {
         
         // Save bookmark for persistence
         if let bookmarkData = try? url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil) {
-            UserDefaults.standard.set(bookmarkData, forKey: folderBookmarkKey)
+            UserDefaults.standard.set(bookmarkData, forKey: watchedFolderBookmarkKey)
         }
         
         startWatching(url: url)
-        scanFolder(url: url)
+        refreshLibrary()
     }
     
     private func loadFolderBookmark() {
-        guard let bookmarkData = UserDefaults.standard.data(forKey: folderBookmarkKey) else {
-            loadSongs() // Fallback to old storage if no folder set
+        guard let bookmarkData = UserDefaults.standard.data(forKey: watchedFolderBookmarkKey) else {
             return
         }
         
@@ -46,7 +57,6 @@ class LibraryStore: ObservableObject {
             
             if url.startAccessingSecurityScopedResource() {
                 startWatching(url: url)
-                scanFolder(url: url)
                 // Note: We don't stopAccessing here because the watcher needs it
             }
         }
@@ -62,7 +72,7 @@ class LibraryStore: ObservableObject {
         
         folderWatcher?.setEventHandler { [weak self] in
             print("Folder changed, re-scanning...")
-            self?.scanFolder(url: url)
+            self?.refreshLibrary()
         }
         
         folderWatcher?.setCancelHandler {
@@ -72,30 +82,54 @@ class LibraryStore: ObservableObject {
         folderWatcher?.resume()
     }
     
-    func scanFolder(url: URL) {
+    func refreshLibrary() {
+        var allSongs: [Song] = []
+        
+        // 1. Scan internal Downloads folder
+        allSongs.append(contentsOf: scan(url: downloadsFolder))
+        
+        // 2. Scan external Watched folder if available
+        if let bookmarkData = UserDefaults.standard.data(forKey: watchedFolderBookmarkKey) {
+            var isStale = false
+            if let url = try? URL(resolvingBookmarkData: bookmarkData, options: .withoutUI, relativeTo: nil, bookmarkDataIsStale: &isStale) {
+                // Since it might already be open or needing security scope:
+                let accessed = url.startAccessingSecurityScopedResource()
+                allSongs.append(contentsOf: scan(url: url))
+                if accessed {
+                    // We keep it open if it's the watched folder usually, 
+                    // but for a one-off scan we can stop if we handle watcher separately.
+                    // However, keeping it simple: scan is fast.
+                }
+            }
+        }
+        
+        // Sort by title
+        let sortedSongs = allSongs.sorted { $0.title.lowercased() < $1.title.lowercased() }
+        
+        DispatchQueue.main.async {
+            self.songs = sortedSongs
+            self.saveSongs()
+        }
+    }
+    
+    private func scan(url: URL) -> [Song] {
         let fileManager = FileManager.default
         let keys: [URLResourceKey] = [.nameKey, .isDirectoryKey]
         
-        guard let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles, .skipsPackageDescendants]) else { return }
+        guard let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles, .skipsPackageDescendants]) else { return [] }
         
-        var newSongs: [Song] = []
+        var foundSongs: [Song] = []
         
         for case let fileURL as URL in enumerator {
             let pathExtension = fileURL.pathExtension.lowercased()
             if ["mp3", "m4a", "wav", "aac"].contains(pathExtension) {
                 let title = fileURL.deletingPathExtension().lastPathComponent
-                // Use a stable UUID derived from the absolute file path so that
-                // playlist references remain valid across app restarts.
                 let stableID = UUID(stableFrom: fileURL.path)
                 let song = Song(id: stableID, title: title, fileURL: fileURL)
-                newSongs.append(song)
+                foundSongs.append(song)
             }
         }
-        
-        DispatchQueue.main.async {
-            self.songs = newSongs
-            self.saveSongs()
-        }
+        return foundSongs
     }
     
     func addSong(_ song: Song) {

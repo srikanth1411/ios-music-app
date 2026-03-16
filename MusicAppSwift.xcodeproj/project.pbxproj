@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6FA83F65C11F45308F467D6B /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 027705886C214553827B1EA9 /* DownloadManager.swift */; };
 		7E1A11012B930A2400C2A111 /* MusicAppSwiftApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11002B930A2400C2A111 /* MusicAppSwiftApp.swift */; };
 		7E1A11032B930A3500C2A111 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11022B930A3500C2A111 /* ContentView.swift */; };
 		7E1A11052B930A3500C2A111 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11042B930A3500C2A111 /* LibraryView.swift */; };
@@ -19,9 +20,15 @@
 		7E1A11212B930A5000C2A111 /* PlaylistListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11222B930A5000C2A111 /* PlaylistListView.swift */; };
 		7E1A11232B930A5000C2A111 /* PlaylistDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11242B930A5000C2A111 /* PlaylistDetailView.swift */; };
 		7E1A11252B930A5000C2A111 /* AddToPlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11262B930A5000C2A111 /* AddToPlaylistView.swift */; };
+		837CB68E5CEA418B94010572 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = B3FADD8FA5AA43EAA9F39892 /* SwiftSoup */; };
+		DBD38485DBD44D1F03CE2FC2 /* NaaSongsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DD36D8DFF7B1A640A1A6D15 /* NaaSongsService.swift */; };
+		EC4FC78B8D522D55ADE6D491 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E56D838333269F702E96E1 /* SearchView.swift */; };
+		EE6F4176A0B356B7DC8B9C02 /* NaaAlbumDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF5BC64EF8870FBFD561CE7 /* NaaAlbumDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		027705886C214553827B1EA9 /* DownloadManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
+		4DD36D8DFF7B1A640A1A6D15 /* NaaSongsService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NaaSongsService.swift; sourceTree = "<group>"; };
 		7E1A11002B930A2400C2A111 /* MusicAppSwiftApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicAppSwiftApp.swift; sourceTree = "<group>"; };
 		7E1A11022B930A3500C2A111 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7E1A11042B930A3500C2A111 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
@@ -35,6 +42,8 @@
 		7E1A11222B930A5000C2A111 /* PlaylistListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistListView.swift; sourceTree = "<group>"; };
 		7E1A11242B930A5000C2A111 /* PlaylistDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailView.swift; sourceTree = "<group>"; };
 		7E1A11262B930A5000C2A111 /* AddToPlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToPlaylistView.swift; sourceTree = "<group>"; };
+		A7E56D838333269F702E96E1 /* SearchView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		EFF5BC64EF8870FBFD561CE7 /* NaaAlbumDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NaaAlbumDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				837CB68E5CEA418B94010572 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,7 +69,11 @@
 		7E1A10FE2B930A1900C2A111 /* MusicAppSwift */ = {
 			isa = PBXGroup;
 			children = (
+				027705886C214553827B1EA9 /* DownloadManager.swift */,
 				7E1A11002B930A2400C2A111 /* MusicAppSwiftApp.swift */,
+				4DD36D8DFF7B1A640A1A6D15 /* NaaSongsService.swift */,
+				EFF5BC64EF8870FBFD561CE7 /* NaaAlbumDetailView.swift */,
+				A7E56D838333269F702E96E1 /* SearchView.swift */,
 				7E1A11022B930A3500C2A111 /* ContentView.swift */,
 				7E1A11042B930A3500C2A111 /* LibraryView.swift */,
 				7E1A11062B930A3500C2A111 /* PlayerView.swift */,
@@ -91,6 +105,9 @@
 			dependencies = (
 			);
 			name = MusicAppSwift;
+			packageProductDependencies = (
+				B3FADD8FA5AA43EAA9F39892 /* SwiftSoup */,
+			);
 			productName = MusicAppSwift;
 			productReference = 7E1A11162B930A5000C2A111 /* MusicAppSwift.app */;
 			productType = "com.apple.product-type.application";
@@ -120,6 +137,9 @@
 				Base,
 			);
 			mainGroup = 7E1A10F72B930A1200C2A111;
+			packageReferences = (
+				4A8B4C07F6BC45C48D301587 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+			);
 			productRefGroup = 7E1A11162B930A5000C2A111 /* MusicAppSwift.app */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -145,7 +165,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6FA83F65C11F45308F467D6B /* DownloadManager.swift in Sources */,
 				7E1A11012B930A2400C2A111 /* MusicAppSwiftApp.swift in Sources */,
+				DBD38485DBD44D1F03CE2FC2 /* NaaSongsService.swift in Sources */,
+				EE6F4176A0B356B7DC8B9C02 /* NaaAlbumDetailView.swift in Sources */,
+				EC4FC78B8D522D55ADE6D491 /* SearchView.swift in Sources */,
 				7E1A11032B930A3500C2A111 /* ContentView.swift in Sources */,
 				7E1A11052B930A3500C2A111 /* LibraryView.swift in Sources */,
 				7E1A11072B930A3500C2A111 /* PlayerView.swift in Sources */,
@@ -361,6 +385,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4A8B4C07F6BC45C48D301587 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B3FADD8FA5AA43EAA9F39892 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4A8B4C07F6BC45C48D301587 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7E1A10F82B930A1200C2A111 /* Project object */;
 }
