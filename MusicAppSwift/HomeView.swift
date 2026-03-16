@@ -140,14 +140,14 @@ struct FeaturedCard: View {
     let album: NaaSearchResult
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 8) {
             if let imageUrlString = album.imageUrl, let imageUrl = URL(string: imageUrlString) {
                 AsyncImage(url: imageUrl) { phase in
                     if let image = phase.image {
                         image.resizable()
                             .aspectRatio(contentMode: .fill)
                     } else {
-                        Rectangle().fill(Color.gray.opacity(0.3))
+                        Rectangle().fill(Color.gray.opacity(0.1))
                     }
                 }
                 .frame(height: 220)
@@ -156,7 +156,7 @@ struct FeaturedCard: View {
             }
             
             Text(album.title)
-                .font(.title3.bold())
+                .font(.headline)
                 .foregroundColor(.primary)
                 .lineLimit(1)
         }
