@@ -68,6 +68,11 @@ struct ContentView: View {
                         Label("Playlists", systemImage: "music.note.list")
                     }
                 
+                OfflineSongsView()
+                    .tabItem {
+                        Label("Offline", systemImage: "arrow.down.circle.fill")
+                    }
+                
                 SearchView()
                     .tabItem {
                         Label("Search", systemImage: "magnifyingglass")

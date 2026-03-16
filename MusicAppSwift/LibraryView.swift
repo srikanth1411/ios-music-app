@@ -10,32 +10,51 @@ struct LibraryView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(library.songs) { song in
-                    Button(action: {
-                        playback.play(song: song)
-                    }) {
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text(song.title)
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                Text(song.artist)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            if playback.currentSong?.id == song.id && playback.isPlaying {
-                                Image(systemName: "speaker.wave.3.fill")
-                                    .foregroundColor(.pink)
-                            }
-                        }
+                Section {
+                    NavigationLink(destination: PlaylistListView()) {
+                        Label("Playlists", systemImage: "music.note.list")
+                            .foregroundColor(.pink)
                     }
-                    .contextMenu {
-                        Button(action: {
-                            selectedSong = song
-                            showingAddToPlaylist = true
-                        }) {
-                            Label("Add to a Playlist...", systemImage: "plus.circle")
+                    
+                    NavigationLink(destination: OfflineSongsView()) {
+                        Label("Downloaded", systemImage: "arrow.down.circle.fill")
+                            .foregroundColor(.pink)
+                    }
+                }
+                
+                Section(header: Text("Recently Added")) {
+                    if library.songs.isEmpty {
+                        Text("No songs in library")
+                            .foregroundColor(.secondary)
+                    } else {
+                        ForEach(library.songs.prefix(20)) { song in
+                            Button(action: {
+                                playback.play(song: song)
+                            }) {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(song.title)
+                                            .font(.headline)
+                                            .foregroundColor(.primary)
+                                        Text(song.artist)
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    Spacer()
+                                    if playback.currentSong?.id == song.id && playback.isPlaying {
+                                        Image(systemName: "speaker.wave.3.fill")
+                                            .foregroundColor(.pink)
+                                    }
+                                }
+                            }
+                            .contextMenu {
+                                Button(action: {
+                                    selectedSong = song
+                                    showingAddToPlaylist = true
+                                }) {
+                                    Label("Add to a Playlist...", systemImage: "plus.circle")
+                                }
+                            }
                         }
                     }
                 }

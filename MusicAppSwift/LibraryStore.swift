@@ -12,6 +12,10 @@ class LibraryStore: ObservableObject {
     private let watchedFolderBookmarkKey = "watched_folder_bookmark"
     private var folderWatcher: DispatchSourceFileSystemObject?
     
+    var downloadedSongs: [Song] {
+        return songs.filter { $0.fileURL.path.contains("/Documents/Downloads/") }
+    }
+    
     // Internal directory for downloaded songs
     var downloadsFolder: URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
