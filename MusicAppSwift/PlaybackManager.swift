@@ -34,12 +34,16 @@ class PlaybackManager: ObservableObject {
     }
     
     func requestPermissions() {
+        #if os(iOS)
         MPMediaLibrary.requestAuthorization { [weak self] status in
             DispatchQueue.main.async {
                 self?.permissionsAuthorized = (status == .authorized)
                 print("Media library access status: \(status.rawValue)")
             }
         }
+        #else
+        permissionsAuthorized = true
+        #endif
     }
     
     func authorizeBackgroundAudio() {
@@ -50,6 +54,7 @@ class PlaybackManager: ObservableObject {
     }
     
     private func setupNotifications() {
+        #if os(iOS)
         // Handle interruptions (phone calls, etc.)
         NotificationCenter.default.addObserver(forName: AVAudioSession.interruptionNotification, object: AVAudioSession.sharedInstance(), queue: .main) { [weak self] notification in
             guard let userInfo = notification.userInfo,
@@ -79,9 +84,11 @@ class PlaybackManager: ObservableObject {
                 self?.pause()
             }
         }
+        #endif
     }
     
     private func setupRemoteCommandCenter() {
+        #if os(iOS)
         let commandCenter = MPRemoteCommandCenter.shared()
         
         commandCenter.playCommand.addTarget { [weak self] _ in
@@ -111,10 +118,13 @@ class PlaybackManager: ObservableObject {
             self.seek(to: positionEvent.positionTime)
             return .success
         }
+        #endif
     }
     
     private var temporaryFileURL: URL?
+    #if os(iOS)
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    #endif
     
     private func cleanup() {
         // ... (previous cleanup steps)
@@ -148,23 +158,28 @@ class PlaybackManager: ObservableObject {
         kvoObservers.removeAll()
         
         // End any previous background task
+        #if os(iOS)
         if backgroundTask != .invalid {
             UIApplication.shared.endBackgroundTask(backgroundTask)
             backgroundTask = .invalid
         }
+        #endif
     }
     
     func play(song: Song) {
         // Re-confirm Audio Session is active before transitioning songs in the background
+        #if os(iOS)
         do {
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             print("Failed to re-activate audio session: \(error)")
         }
+        #endif
 
         cleanup()
         
         // Request a background task to guarantee transition time if the user locks the screen immediately
+        #if os(iOS)
         backgroundTask = UIApplication.shared.beginBackgroundTask { [weak self] in
             guard let self = self else { return }
             if self.backgroundTask != .invalid {
@@ -172,6 +187,7 @@ class PlaybackManager: ObservableObject {
                 self.backgroundTask = .invalid
             }
         }
+        #endif
         
         var localPlayURL: URL? = nil
         let tempFile = FileManager.default.temporaryDirectory.appendingPathComponent(song.fileURL.lastPathComponent)
@@ -202,8 +218,10 @@ class PlaybackManager: ObservableObject {
         }
         
         guard let finalURL = localPlayURL else {
+            #if os(iOS)
             UIApplication.shared.endBackgroundTask(backgroundTask)
             backgroundTask = .invalid
+            #endif
             return
         }
         
@@ -236,11 +254,13 @@ class PlaybackManager: ObservableObject {
                     }
                     self.updateNowPlayingInfo()
                     
+                    #if os(iOS)
                     if self.backgroundTask != .invalid {
                         UIApplication.shared.endBackgroundTask(self.backgroundTask)
                         self.backgroundTask = .invalid
                         print("Background Task successfully ended. Audio is playing.")
                     }
+                    #endif
                 }
             }
             // Store the observer to prevent it from being deallocated immediately and to clean it up later.
@@ -252,10 +272,12 @@ class PlaybackManager: ObservableObject {
             // Fallback for older iOS (mostly irrelevant now, but safe)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                 guard let self = self else { return }
+                #if os(iOS)
                 if self.backgroundTask != .invalid {
                     UIApplication.shared.endBackgroundTask(self.backgroundTask)
                     self.backgroundTask = .invalid
                 }
+                #endif
             }
         }
         
@@ -285,11 +307,13 @@ class PlaybackManager: ObservableObject {
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.currentTime
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.isPlaying ? 1.0 : 0.0
             
+            #if os(iOS)
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
             
             if #available(iOS 13.0, *) {
                 MPNowPlayingInfoCenter.default().playbackState = self.isPlaying ? .playing : .paused
             }
+            #endif
         }
     }
     

@@ -12,9 +12,15 @@ let package = Package(
             name: "MusicAppSwift",
             targets: ["MusicAppSwift"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/scinfu/SwiftSoup.git", from: "2.6.0")
+    ],
     targets: [
         .executableTarget(
             name: "MusicAppSwift",
+            dependencies: [
+                "SwiftSoup"
+            ],
             path: "MusicAppSwift")
     ]
 )

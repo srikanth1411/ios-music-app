@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  This file is auto-patched by serve.sh — the BASE_URL placeholder is
+  replaced with the real ngrok HTTPS URL each time the server starts.
+-->
+<plist version="1.0">
+<dict>
+    <key>items</key>
+    <array>
+        <dict>
+            <key>assets</key>
+            <array>
+                <!-- Primary IPA download asset -->
+                <dict>
+                    <key>kind</key>
+                    <string>software-package</string>
+                    <key>url</key>
+                    <string>BASE_URL/MusicAppSwift.ipa</string>
+                </dict>
+            </array>
+            <key>metadata</key>
+            <dict>
+                <!-- Must exactly match CFBundleIdentifier in your Info.plist -->
+                <key>bundle-identifier</key>
+                <string>com.srikanth.MusicAppSwift</string>
+
+                <!-- Must exactly match CFBundleVersion -->
+                <key>bundle-version</key>
+                <string>1.0</string>
+
+                <!-- Always "software" for iOS apps -->
+                <key>kind</key>
+                <string>software</string>
+
+                <!-- Display name shown during install -->
+                <key>title</key>
+                <string>MusicAppSwift</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

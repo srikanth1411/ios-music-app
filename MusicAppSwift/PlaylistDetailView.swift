@@ -98,6 +98,8 @@ struct PlaylistDetailView: View {
             }
         }
         .navigationTitle(playlist.name)
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 }

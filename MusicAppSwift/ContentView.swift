@@ -68,7 +68,7 @@ struct ContentView: View {
                         Label("Playlists", systemImage: "music.note.list")
                     }
                 
-                Text("Search")
+                SearchView()
                     .tabItem {
                         Label("Search", systemImage: "magnifyingglass")
                     }
@@ -117,7 +117,11 @@ struct ContentView: View {
                         .padding(.horizontal, 40)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(.systemBackground))
+                #if os(iOS)
+                .background(Color(uiColor: .systemBackground))
+                #else
+                .background(Color(nsColor: .windowBackgroundColor))
+                #endif
                 .zIndex(100)
             }
         }

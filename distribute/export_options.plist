@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- development: Xcode manages the profile automatically.
+         The target device must be registered in your Apple Developer account. -->
+    <key>method</key>
+    <string>development</string>
+
+    <!-- Your Apple Developer Team ID -->
+    <key>teamID</key>
+    <string>6HVUZP4K3F</string>
+
+    <!-- Strip Swift symbols to reduce IPA size -->
+    <key>stripSwiftSymbols</key>
+    <true/>
+
+    <!-- Thinning: none = universal IPA (works on all registered devices) -->
+    <key>thinning</key>
+    <string>&lt;none&gt;</string>
+</dict>
+</plist>

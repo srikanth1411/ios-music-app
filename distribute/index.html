@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MusicAppSwift — Install</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- QR Code library (no install needed) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #13131a;
+      --card:      #1c1c28;
+      --border:    rgba(255,255,255,0.08);
+      --accent:    #a855f7;
+      --accent2:   #6366f1;
+      --text:      #f1f0ff;
+      --muted:     #8b8aa8;
+      --success:   #34d399;
+      --radius:    20px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% -20%, rgba(168,85,247,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(99,102,241,0.1) 0%, transparent 60%);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      backdrop-filter: blur(20px);
+    }
+
+    .app-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 8px 32px rgba(168,85,247,0.35);
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 32px;
+      font-weight: 400;
+    }
+
+    /* QR code wrapper */
+    .qr-wrapper {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      display: inline-block;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 24px rgba(168,85,247,0.2);
+    }
+
+    #qrcode canvas,
+    #qrcode img { display: block; }
+
+    /* Install button */
+    .btn-install {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+      box-shadow: 0 4px 24px rgba(168,85,247,0.4);
+      margin-bottom: 20px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-install:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(168,85,247,0.55);
+    }
+
+    .btn-install:active { transform: translateY(0); opacity: 0.9; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 13px;
+    }
+
+    .info-row span:first-child { color: var(--muted); }
+    .info-row span:last-child  { font-weight: 500; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(52,211,153,0.12);
+      color: var(--success);
+      border: 1px solid rgba(52,211,153,0.25);
+      border-radius: 50px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 16px;
+    }
+
+    .url-chip {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: monospace;
+      word-break: break-all;
+      margin-top: 8px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="app-icon">🎵</div>
+    <h1>MusicAppSwift</h1>
+    <p class="subtitle">Ad-Hoc Build · v1.0 · iOS 15.0+</p>
+
+    <div class="badge">Server Online</div>
+
+    <!-- QR Code renders here -->
+    <div class="qr-wrapper">
+      <div id="qrcode"></div>
+    </div>
+
+    <!-- Tap-to-install link (only works on iOS) -->
+    <a id="install-link" class="btn-install" href="#">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Install on iPhone
+    </a>
+
+    <hr class="divider" />
+
+    <div class="info-row">
+      <span>Bundle ID</span>
+      <span>com.srikanth.MusicAppSwift</span>
+    </div>
+    <div class="info-row">
+      <span>Team</span>
+      <span>6HVUZP4K3F</span>
+    </div>
+    <div class="info-row">
+      <span>Distribution</span>
+      <span>Ad-Hoc</span>
+    </div>
+
+    <p class="note">
+      Scan the QR code on your registered iPhone, or tap <strong>Install on iPhone</strong>
+      directly in Safari. Device UDID must be registered in the Ad-Hoc provisioning profile.
+    </p>
+    <div id="current-url" class="url-chip"></div>
+  </div>
+
+  <script>
+    // Auto-detect current origin so QR always points to the right URL
+    const base   = window.location.origin;
+    const manifest = encodeURIComponent(base + '/manifest.plist');
+    const installURL = 'itms-services://?action=download-manifest&url=' + manifest;
+
+    // Set the install button href
+    document.getElementById('install-link').href = installURL;
+
+    // Show the current server URL for reference
+    document.getElementById('current-url').textContent = base;
+
+    // Generate the QR code for the install link
+    new QRCode(document.getElementById('qrcode'), {
+      text: installURL,
+      width: 220,
+      height: 220,
+      colorDark: '#0a0a0f',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  </script>
+</body>
+</html>

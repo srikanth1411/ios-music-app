@@ -38,7 +38,9 @@ struct AddToPlaylistView: View {
                 }
             }
             .navigationTitle("Add to Playlist")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {

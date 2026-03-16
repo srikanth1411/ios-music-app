@@ -15,10 +15,10 @@
 		7E1A11112B930A3500C2A111 /* PlaybackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11102B930A3500C2A111 /* PlaybackManager.swift */; };
 		7E1A11132B930A3500C2A111 /* Song.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11122B930A3500C2A111 /* Song.swift */; };
 		7E1A11152B930A3500C2A111 /* DocumentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11142B930A3500C2A111 /* DocumentPicker.swift */; };
+		7E1A111F2B930A5000C2A111 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7E1A111E2B930A5000C2A111 /* Assets.xcassets */; };
 		7E1A11212B930A5000C2A111 /* PlaylistListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11222B930A5000C2A111 /* PlaylistListView.swift */; };
 		7E1A11232B930A5000C2A111 /* PlaylistDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11242B930A5000C2A111 /* PlaylistDetailView.swift */; };
 		7E1A11252B930A5000C2A111 /* AddToPlaylistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E1A11262B930A5000C2A111 /* AddToPlaylistView.swift */; };
-		7E1A111F2B930A5000C2A111 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7E1A111E2B930A5000C2A111 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,10 +30,11 @@
 		7E1A11102B930A3500C2A111 /* PlaybackManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackManager.swift; sourceTree = "<group>"; };
 		7E1A11122B930A3500C2A111 /* Song.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Song.swift; sourceTree = "<group>"; };
 		7E1A11142B930A3500C2A111 /* DocumentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPicker.swift; sourceTree = "<group>"; };
+		7E1A11162B930A5000C2A111 /* MusicAppSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicAppSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E1A111E2B930A5000C2A111 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7E1A11222B930A5000C2A111 /* PlaylistListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistListView.swift; sourceTree = "<group>"; };
 		7E1A11242B930A5000C2A111 /* PlaylistDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistDetailView.swift; sourceTree = "<group>"; };
 		7E1A11262B930A5000C2A111 /* AddToPlaylistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToPlaylistView.swift; sourceTree = "<group>"; };
-		7E1A111E2B930A5000C2A111 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,25 +75,7 @@
 			path = MusicAppSwift;
 			sourceTree = "<group>";
 		};
-		7E1A11162B930A5000C2A111 /* MusicAppSwift.app */ = {
-			isa = PBXFileReference;
-			explicitFileType = wrapper.application;
-			includeInIndex = 0;
-			path = MusicAppSwift.app;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 /* End PBXGroup section */
-
-/* Begin PBXResourcesBuildPhase section */
-		7E1A11202B930A5000C2A111 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7E1A111F2B930A5000C2A111 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		7E1A11182B930A5000C2A111 /* MusicAppSwift */ = {
@@ -145,6 +128,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7E1A11202B930A5000C2A111 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E1A111F2B930A5000C2A111 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		7E1A111C2B930A5000C2A111 /* Sources */ = {
@@ -290,26 +284,24 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BUNDLE_IDENTIFIER = com.srikanth.MusicAppSwift;
+				BUNDLE_IDENTIFIER = com.srikanth1411.MusicAppSwift;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 6HVUZP4K3F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "MusicAppSwift/Info.plist";
+				INFOPLIST_FILE = MusicAppSwift/Info.plist;
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "We need access to your music library to play your favorite songs.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.srikanth.MusicAppSwift;
+				PRODUCT_BUNDLE_IDENTIFIER = com.srikanth1411.MusicAppSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -322,25 +314,24 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				BUNDLE_IDENTIFIER = com.srikanth.MusicAppSwift;
+				BUNDLE_IDENTIFIER = com.srikanth1411.MusicAppSwift;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = 6HVUZP4K3F;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "MusicAppSwift/Info.plist";
+				INFOPLIST_FILE = MusicAppSwift/Info.plist;
 				INFOPLIST_KEY_NSAppleMusicUsageDescription = "We need access to your music library to play your favorite songs.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIBackgroundModes = (
-					audio,
-				);
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.srikanth.MusicAppSwift;
+				PRODUCT_BUNDLE_IDENTIFIER = com.srikanth1411.MusicAppSwift;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
