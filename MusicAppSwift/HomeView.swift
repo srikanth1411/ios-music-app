@@ -159,10 +159,6 @@ struct FeaturedCard: View {
                 .font(.title3.bold())
                 .foregroundColor(.primary)
                 .lineLimit(1)
-            
-            Text("Telugu Songs")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
         }
     }
 }

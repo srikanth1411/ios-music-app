@@ -37,7 +37,7 @@ struct Song: Identifiable, Codable {
     
     // We'll handle artwork via a helper or at the UI layer to avoid Model-level UI framework dependencies
     
-    init(id: UUID = UUID(), title: String, artist: String = "Unknown Artist", album: String = "Unknown Album", fileURL: URL, artworkURL: URL? = nil, duration: TimeInterval = 0) {
+    init(id: UUID = UUID(), title: String, artist: String = "", album: String = "", fileURL: URL, artworkURL: URL? = nil, duration: TimeInterval = 0) {
         self.id = id
         self.title = title
         self.artist = artist

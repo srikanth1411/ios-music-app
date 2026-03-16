@@ -45,7 +45,7 @@ struct PlayerView: View {
                 VStack(spacing: 8) {
                     Text(playback.currentSong?.title ?? "Not Playing")
                         .font(.title2.bold())
-                    Text(playback.currentSong?.artist ?? "Unknown Artist")
+                    Text(playback.currentSong?.artist ?? "")
                         .font(.title3)
                         .foregroundColor(.secondary)
                 }

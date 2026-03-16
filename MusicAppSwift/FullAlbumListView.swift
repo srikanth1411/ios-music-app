@@ -35,13 +35,8 @@ struct FullAlbumListView: View {
                         
                         VStack(alignment: .leading, spacing: 4) {
                             Text(album.title)
-                                .font(.system(size: 17, weight: .regular))
+                                .font(.system(size: 15, weight: .regular))
                                 .foregroundColor(.primary)
-                                .lineLimit(1)
-                            
-                            Text("Telugu Album")
-                                .font(.system(size: 15))
-                                .foregroundColor(.secondary)
                                 .lineLimit(1)
                         }
                     }

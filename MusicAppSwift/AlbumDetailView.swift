@@ -218,7 +218,7 @@ struct AlbumDetailView: View {
         let newSong = Song(
             id: UUID(),
             title: song.title,
-            artist: "Telugu Hits",
+            artist: "",
             album: album.title,
             fileURL: url,
             artworkURL: artworkURL

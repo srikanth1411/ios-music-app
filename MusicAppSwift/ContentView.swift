@@ -15,7 +15,7 @@ struct MiniPlayer: View {
             VStack(alignment: .leading) {
                 Text(playback.currentSong?.title ?? "Not Playing")
                     .font(.body.bold())
-                Text(playback.currentSong?.artist ?? "Unknown Artist")
+                Text(playback.currentSong?.artist ?? "")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
