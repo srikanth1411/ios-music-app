@@ -38,6 +38,11 @@ struct HomeView: View {
                             .padding(.horizontal)
                         }
                         
+                        // Recently Played Section
+                        if !LibraryStore.shared.recentlyPlayedAlbums.isEmpty {
+                            AlbumRowSection(title: "Recently Played", albums: LibraryStore.shared.recentlyPlayedAlbums)
+                        }
+                        
                         // Horizontal Section: Latest Releases
                         AlbumRowSection(title: "New Releases", albums: latestAlbums)
                         

@@ -58,6 +58,7 @@ struct NaaAlbumDetailView: View {
         .navigationTitle(albumResult.title)
         .onAppear {
             loadSongs()
+            LibraryStore.shared.addToRecentlyPlayed(album: albumResult)
         }
     }
     

@@ -1,17 +1,30 @@
 import Foundation
 import SwiftSoup
 
-struct NaaSearchResult: Identifiable {
-    let id = UUID()
+struct NaaSearchResult: Identifiable, Codable {
+    let id: UUID
     let title: String
     let link: String
     let imageUrl: String?
+    
+    init(id: UUID = UUID(), title: String, link: String, imageUrl: String?) {
+        self.id = id
+        self.title = title
+        self.link = link
+        self.imageUrl = imageUrl
+    }
 }
 
-struct NaaSong: Identifiable {
-    let id = UUID()
+struct NaaSong: Identifiable, Codable {
+    let id: UUID
     let title: String
     let downloadUrl: String
+    
+    init(id: UUID = UUID(), title: String, downloadUrl: String) {
+        self.id = id
+        self.title = title
+        self.downloadUrl = downloadUrl
+    }
 }
 
 class NaaSongsService {

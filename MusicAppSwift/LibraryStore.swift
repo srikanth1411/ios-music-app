@@ -4,11 +4,13 @@ import Combine
 class LibraryStore: ObservableObject {
     @Published var songs: [Song] = []
     @Published var playlists: [Playlist] = []
+    @Published var recentlyPlayedAlbums: [NaaSearchResult] = []
     
     static let shared = LibraryStore()
     
     private let storageKey = "saved_songs"
     private let playlistsKey = "saved_playlists"
+    private let recentAlbumsKey = "recent_albums"
     private let watchedFolderBookmarkKey = "watched_folder_bookmark"
     private var folderWatcher: DispatchSourceFileSystemObject?
     
@@ -29,6 +31,7 @@ class LibraryStore: ObservableObject {
     
     private init() {
         loadPlaylists()
+        loadRecentAlbums()
         loadFolderBookmark()
         // Always scan both on init
         refreshLibrary()
@@ -193,6 +196,32 @@ class LibraryStore: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: playlistsKey),
            let decoded = try? JSONDecoder().decode([Playlist].self, from: data) {
             self.playlists = decoded
+        }
+    }
+    
+    func addToRecentlyPlayed(album: NaaSearchResult) {
+        // Remove if already exists to move to top
+        recentlyPlayedAlbums.removeAll { $0.link == album.link }
+        recentlyPlayedAlbums.insert(album, at: 0)
+        
+        // Keep max 20
+        if recentlyPlayedAlbums.count > 20 {
+            recentlyPlayedAlbums.removeLast()
+        }
+        
+        saveRecentAlbums()
+    }
+    
+    private func saveRecentAlbums() {
+        if let encoded = try? JSONEncoder().encode(recentlyPlayedAlbums) {
+            UserDefaults.standard.set(encoded, forKey: recentAlbumsKey)
+        }
+    }
+    
+    private func loadRecentAlbums() {
+        if let data = UserDefaults.standard.data(forKey: recentAlbumsKey),
+           let decoded = try? JSONDecoder().decode([NaaSearchResult].self, from: data) {
+            self.recentlyPlayedAlbums = decoded
         }
     }
 }
