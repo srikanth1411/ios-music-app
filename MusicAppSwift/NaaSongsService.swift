@@ -28,23 +28,34 @@ class NaaSongsService {
         request.setValue("Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X)", forHTTPHeaderField: "User-Agent")
         
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
+        guard let httpResponse = response as? HTTPURLResponse,
               let html = String(data: data, encoding: .utf8) else {
+            print("NaaSongs: Failed to get HTML or response")
             throw URLError(.badServerResponse)
         }
+        
+        print("NaaSongs: Search status \(httpResponse.statusCode), body length: \(html.count)")
         
         let doc = try SwiftSoup.parse(html)
         var results: [NaaSearchResult] = []
         
-        let posts = try doc.select(".post-image")
+        // The theme seems to use <article> tags for search results
+        let articles = try doc.select("article")
+        print("NaaSongs: Found \(articles.size()) article tags")
         
-        for post in posts.array() {
-            if let aTag = try post.select("a").first() {
-                let link = try aTag.attr("href")
-                let title = try aTag.attr("title").replacingOccurrences(of: " Songs", with: "")
+        for article in articles.array() {
+            // Title and Link are usually in the entry-title h2
+            if let titleTag = try article.select("h2.entry-title a").first() {
+                let link = try titleTag.attr("href")
+                let titleText = try titleTag.text()
+                print("NaaSongs: Found result: \(titleText) at \(link)")
+                
+                let title = titleText.replacingOccurrences(of: " Songs", with: "").replacingOccurrences(of: " Songs download", with: "")
                 
                 var imageUrl: String? = nil
-                if let imgTag = try post.select("img").first() {
+                if let imgTag = try article.select("img.wp-post-image").first() {
+                    imageUrl = try imgTag.attr("src")
+                } else if let imgTag = try article.select("img").first() {
                     imageUrl = try imgTag.attr("src")
                 }
                 
@@ -69,28 +80,51 @@ class NaaSongsService {
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200,
               let html = String(data: data, encoding: .utf8) else {
+            print("NaaSongs: Failed to get album details")
             throw URLError(.badServerResponse)
         }
+        
+        print("NaaSongs: Album page length: \(html.count)")
         
         let doc = try SwiftSoup.parse(html)
         var songs: [NaaSong] = []
         
         let aTags = try doc.select("a")
+        print("NaaSongs: Found \(aTags.size()) total links on album page")
+        
         for aTag in aTags.array() {
             let href = try aTag.attr("href")
             if href.lowercased().hasSuffix(".mp3") {
+                print("NaaSongs: Found mp3 link: \(href)")
                 // Determine title
-                var title = try aTag.text()
-                // If title is just "Download" or something generic, try looking at the filename or parent element
-                if title.lowercased().contains("download") {
-                    title = URL(string: href)?.lastPathComponent.replacingOccurrences(of: ".mp3", with: "") ?? "Unknown Song"
+                var title = try aTag.text().trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                // If title is just "Download" or something generic, try looking at the parent's text
+                if title.lowercased() == "download" || title.isEmpty {
+                    if let parent = aTag.parent() {
+                        let parentText = try parent.text()
+                        if let separatorIndex = parentText.firstIndex(of: "–") {
+                            title = String(parentText[..<separatorIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
+                        } else if let dashIndex = parentText.firstIndex(of: "-") {
+                            title = String(parentText[..<dashIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
+                        } else {
+                            title = parentText.replacingOccurrences(of: "Download", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+                        }
+                    }
                 }
                 
-                // Decode percent-encoded filename for display
-                title = title.removingPercentEncoding ?? title
+                // Final fallback to Filename
+                if title.lowercased() == "download" || title.isEmpty || title.count > 100 {
+                    title = URL(string: href)?.lastPathComponent.replacingOccurrences(of: ".mp3", with: "") ?? "Unknown Song"
+                    title = title.removingPercentEncoding ?? title
+                }
+                
+                // Cleanup common remnants
+                title = title.replacingOccurrences(of: " Song", with: "")
+                title = title.replacingOccurrences(of: " song", with: "")
                 
                 // Skip duplicated lower bitrate links if we have 320kbps
-                if href.contains("128") && !songs.isEmpty {
+                if href.contains("128") && groupsOf320Exist(in: aTags) {
                     continue
                 }
                 
@@ -103,5 +137,9 @@ class NaaSongsService {
         }
         
         return songs
+    }
+    
+    private func groupsOf320Exist(in tags: Elements) -> Bool {
+        return tags.array().contains { (try? $0.attr("href").contains("320")) ?? false }
     }
 }
