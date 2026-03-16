@@ -22,15 +22,25 @@ struct PlayerView: View {
                     
                     // Adaptive Artwork
                     let size = min(geometry.size.width * 0.8, geometry.size.height * 0.4)
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(LinearGradient(colors: [.gray.opacity(0.3), .gray.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: size, height: size)
-                        .overlay(
-                            Image(systemName: "music.note")
-                                .font(.system(size: size * 0.3))
-                                .foregroundColor(.gray)
-                        )
-                        .shadow(radius: 20)
+                    
+                    Group {
+                        if let artworkURL = playback.currentSong?.artworkURL {
+                            AsyncImage(url: artworkURL) { phase in
+                                if let image = phase.image {
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } else {
+                                    artworkFallback(size: size)
+                                }
+                            }
+                        } else {
+                            artworkFallback(size: size)
+                        }
+                    }
+                    .frame(width: size, height: size)
+                    .cornerRadius(12)
+                    .shadow(radius: 20)
+                
                 
                 VStack(spacing: 8) {
                     Text(playback.currentSong?.title ?? "Not Playing")
@@ -115,6 +125,16 @@ struct PlayerView: View {
             .padding()
         }
         }
+    }
+    
+    private func artworkFallback(size: CGFloat) -> some View {
+        RoundedRectangle(cornerRadius: 12)
+            .fill(LinearGradient(colors: [.gray.opacity(0.3), .gray.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            .overlay(
+                Image(systemName: "music.note")
+                    .font(.system(size: size * 0.3))
+                    .foregroundColor(.gray)
+            )
     }
     
     private func formatTime(_ time: TimeInterval) -> String {

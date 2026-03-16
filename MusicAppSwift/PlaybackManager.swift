@@ -308,12 +308,36 @@ class PlaybackManager: ObservableObject {
             nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.isPlaying ? 1.0 : 0.0
             
             #if os(iOS)
+            if let artworkURL = song.artworkURL {
+                self.loadArtwork(from: artworkURL) { image in
+                    if let image = image {
+                        let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+                        nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+                        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+                    }
+                }
+            }
+            
             MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
             
             if #available(iOS 13.0, *) {
                 MPNowPlayingInfoCenter.default().playbackState = self.isPlaying ? .playing : .paused
             }
             #endif
+        }
+    }
+    
+    private func loadArtwork(from url: URL, completion: @escaping (UIImage?) -> Void) {
+        if url.isFileURL {
+            completion(UIImage(contentsOfFile: url.path))
+        } else {
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                if let data = data {
+                    completion(UIImage(data: data))
+                } else {
+                    completion(nil)
+                }
+            }.resume()
         }
     }
     

@@ -213,7 +213,8 @@ struct NaaAlbumDetailView: View {
         
         guard let url = URL(string: naaSong.downloadUrl) else { return }
         
-        let newSong = Song(id: UUID(), title: naaSong.title, fileURL: url)
+        let artworkURL = naaSong.artworkUrl.flatMap { URL(string: $0) }
+        let newSong = Song(id: UUID(), title: naaSong.title, fileURL: url, artworkURL: artworkURL)
         playback.play(song: newSong)
     }
 }
