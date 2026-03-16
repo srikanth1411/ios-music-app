@@ -7,10 +7,71 @@ struct AlbumDetailView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     
+    @State private var selectedSongForPlaylist: Song?
+    @State private var showingAddToPlaylist = false
+    
     @ObservedObject var playback = PlaybackManager.shared
     
     var body: some View {
         List {
+            // Album Header
+            Section {
+                VStack(spacing: 20) {
+                    if let imageUrlString = album.imageUrl, let imageUrl = URL(string: imageUrlString) {
+                        AsyncImage(url: imageUrl) { phase in
+                            if let image = phase.image {
+                                image.resizable()
+                                    .aspectRatio(contentMode: .fill)
+                            } else {
+                                Rectangle().fill(Color.gray.opacity(0.1))
+                            }
+                        }
+                        .frame(width: 200, height: 200)
+                        .cornerRadius(12)
+                        .shadow(radius: 10)
+                    }
+                    
+                    VStack(spacing: 4) {
+                        Text(album.title)
+                            .font(.title2.bold())
+                            .multilineTextAlignment(.center)
+                        Text("Telugu Album")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack(spacing: 20) {
+                        Button(action: {
+                            playAlbum()
+                        }) {
+                            HStack {
+                                Image(systemName: "play.fill")
+                                Text("Play")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.primary.opacity(0.1))
+                            .cornerRadius(10)
+                        }
+                        
+                        Button(action: {
+                            shuffleAlbum()
+                        }) {
+                            HStack {
+                                Image(systemName: "shuffle")
+                                Text("Shuffle")
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color.primary.opacity(0.1))
+                            .cornerRadius(10)
+                        }
+                    }
+                }
+                .padding(.vertical)
+                .listRowBackground(Color.clear)
+            }
+            
             if !songs.isEmpty {
                 Section {
                     Button(action: downloadAll) {
@@ -84,6 +145,21 @@ struct AlbumDetailView: View {
                         }
                     }
                     .padding(.vertical, 4)
+                    .contextMenu {
+                        Button(action: {
+                            prepareForPlaylist(song)
+                        }) {
+                            Label("Add to a Playlist...", systemImage: "plus.circle")
+                        }
+                        
+                        if !isSongDownloaded(song) {
+                            Button(action: {
+                                DownloadManager.shared.download(song)
+                            }) {
+                                Label("Download", systemImage: "arrow.down")
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -92,6 +168,38 @@ struct AlbumDetailView: View {
             loadSongs()
             LibraryStore.shared.addToRecentlyPlayed(album: album)
         }
+        .sheet(isPresented: $showingAddToPlaylist) {
+            if let song = selectedSongForPlaylist {
+                AddToPlaylistView(song: song)
+            }
+        }
+    }
+    
+    private func playAlbum() {
+        guard let first = songs.first else { return }
+        let queue = songs.map { $0.toSong(albumTitle: album.title) }
+        playback.shuffleMode = .off
+        playback.play(song: first.toSong(albumTitle: album.title), queue: queue)
+    }
+    
+    private func shuffleAlbum() {
+        guard !songs.isEmpty else { return }
+        let shuffled = songs.shuffled()
+        if let first = shuffled.first {
+            let queue = shuffled.map { $0.toSong(albumTitle: album.title) }
+            playback.shuffleMode = .on
+            playback.play(song: first.toSong(albumTitle: album.title), queue: queue)
+        }
+    }
+    
+    private func prepareForPlaylist(_ naaSong: NaaSong) {
+        // If it's already downloaded, use the local song for stability
+        if let localSong = LibraryStore.shared.songs.first(where: { $0.title == naaSong.title }) {
+            selectedSongForPlaylist = localSong
+        } else {
+            selectedSongForPlaylist = naaSong.toSong(albumTitle: album.title)
+        }
+        showingAddToPlaylist = true
     }
     
     private func downloadAll() {
@@ -207,23 +315,15 @@ struct AlbumDetailView: View {
     }
     
     private func playNaaSong(_ song: NaaSong) {
+        let queue = songs.map { $0.toSong(albumTitle: album.title) }
+        playback.shuffleMode = .off
+        
         if let localSong = LibraryStore.shared.songs.first(where: { $0.title == song.title }) {
-            playback.play(song: localSong)
+            playback.play(song: localSong, queue: queue)
             return
         }
         
-        guard let url = URL(string: song.downloadUrl) else { return }
-        
-        let artworkURL = song.artworkUrl.flatMap { URL(string: $0) }
-        let newSong = Song(
-            id: UUID(),
-            title: song.title,
-            artist: "",
-            album: album.title,
-            fileURL: url,
-            artworkURL: artworkURL
-        )
-        playback.play(song: newSong)
+        playback.play(song: song.toSong(albumTitle: album.title), queue: queue)
     }
 }
 

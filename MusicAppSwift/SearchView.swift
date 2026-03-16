@@ -6,42 +6,43 @@ struct SearchView: View {
     @State private var suggestedResults: [NaaSearchResult] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var searchTask: Task<Void, Error>?
     
     var body: some View {
         NavigationView {
             List {
-                if isLoading {
-                    HStack {
-                        Spacer()
-                        ProgressView("Searching NaaSongs...")
-                        Spacer()
-                    }
-                    .listRowBackground(Color.clear)
-                } else if let errorMessage {
+                if let errorMessage = errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
-                } else {
-                    if results.isEmpty {
-                        // Show "Suggested" if results are empty (either no match or empty query)
-                        Section(header: Text(searchQuery.isEmpty ? "Trending Albums" : "No results found. Suggested for You")) {
+                }
+                
+                if results.isEmpty {
+                    if searchQuery.isEmpty {
+                        // Show Trending only when not searching
+                        Section(header: Text("Trending Albums")) {
                             ForEach(suggestedResults) { result in
                                 AlbumRow(result: result)
                             }
                         }
-                    } else {
-                        // Display search results
-                        Section(header: Text("Search Results")) {
-                            ForEach(results) { result in
-                                AlbumRow(result: result)
-                            }
+                    } else if !isLoading {
+                        // User requested to "just show not found"
+                        Text("Not Found")
+                            .foregroundColor(.secondary)
+                            .padding()
+                    }
+                } else {
+                    // Display search results
+                    Section(header: Text("Search Results")) {
+                        ForEach(results) { result in
+                            AlbumRow(result: result)
                         }
                     }
                 }
             }
             .navigationTitle("Search")
-            .searchable(text: $searchQuery, prompt: "Search Albums (Telugu, etc.)")
-            .onSubmit(of: .search) {
-                performSearch()
+            .searchable(text: $searchQuery, prompt: "Search Song or Movie (Telugu)")
+            .onChange(of: searchQuery) { newValue in
+                performDebouncedSearch()
             }
             .onAppear {
                 loadSuggestions()
@@ -66,26 +67,42 @@ struct SearchView: View {
         }
     }
     
-    private func performSearch() {
-        guard !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty else {
+    private func performDebouncedSearch() {
+        searchTask?.cancel()
+        
+        let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if trimmedQuery.isEmpty {
             results = []
+            isLoading = false
+            errorMessage = nil
             return
         }
         
+        // Immediately indicate we are in search mode
+        // Clear results and set isLoading to true so UI hides Trending and "Not Found"
+        results = []
         isLoading = true
         errorMessage = nil
         
-        Task {
+        searchTask = Task {
+            // Debounce for 300ms
+            try await Task.sleep(nanoseconds: 300 * 1_000_000)
+            
             do {
                 let fetchedResults = try await NaaSongsService.shared.search(query: searchQuery)
-                await MainActor.run {
-                    self.results = fetchedResults
-                    self.isLoading = false
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        self.results = fetchedResults
+                        self.isLoading = false
+                    }
                 }
             } catch {
-                await MainActor.run {
-                    self.errorMessage = "NaaSongs Search failed: \(error.localizedDescription)"
-                    self.isLoading = false
+                if !Task.isCancelled {
+                    await MainActor.run {
+                        self.errorMessage = "Search failed: \(error.localizedDescription)"
+                        self.isLoading = false
+                    }
                 }
             }
         }

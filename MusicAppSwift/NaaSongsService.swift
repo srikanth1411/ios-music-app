@@ -27,6 +27,50 @@ struct NaaSong: Identifiable, Codable {
         self.downloadUrl = downloadUrl
         self.artworkUrl = artworkUrl
     }
+    
+    func toSong(albumTitle: String) -> Song {
+        let artworkURL = self.artworkUrl.flatMap { URL(string: $0) }
+        return Song(
+            id: UUID(stableFrom: self.downloadUrl),
+            title: self.title,
+            artist: "",
+            album: albumTitle,
+            fileURL: URL(string: self.downloadUrl)!,
+            artworkURL: artworkURL
+        )
+    }
+}
+
+// iTunes Metadata Resolution Structures
+struct ITunesSearchResult: Codable {
+    let resultCount: Int
+    let results: [ITunesItem]
+}
+
+struct ITunesItem: Codable {
+    let collectionName: String?
+    let trackName: String?
+    let artistName: String?
+}
+
+class MetadataService {
+    static let shared = MetadataService()
+    
+    func resolveCollectionName(query: String) async -> String? {
+        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://itunes.apple.com/search?term=\(encodedQuery)&entity=song&country=in&limit=1") else {
+            return nil
+        }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let result = try JSONDecoder().decode(ITunesSearchResult.self, from: data)
+            return result.results.first?.collectionName
+        } catch {
+            print("MetadataService: Resolution failed: \(error)")
+        }
+        return nil
+    }
 }
 
 class NaaSongsService {
@@ -56,7 +100,41 @@ class NaaSongsService {
     
     // Scrapes the search page: https://naasongs.com.co/?s=telugu
     func search(query: String) async throws -> [NaaSearchResult] {
-        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+        // 1. SMART RESOLUTION: Try to find the movie/album name via iTunes API
+        let movieMatch = await MetadataService.shared.resolveCollectionName(query: query)
+        
+        // 2. PRIMARY SEARCH: Search NaaSongs with the original query
+        var finalResults: [NaaSearchResult] = []
+        
+        do {
+            let originalResults = try await performNaaSearch(term: query)
+            finalResults.append(contentsOf: originalResults)
+        } catch {
+            print("NaaSongs: Primary search failed: \(error)")
+        }
+        
+        // 3. SMART SEARCH: If we have a movie match and it's different from the query, search it too
+        if let movie = movieMatch, movie.lowercased() != query.lowercased() {
+            print("NaaSongs: Smart resolution found movie: \(movie). Performing secondary search...")
+            do {
+                let movieResults = try await performNaaSearch(term: movie)
+                // Add new results only
+                for result in movieResults {
+                    if !finalResults.contains(where: { $0.link == result.link }) {
+                        finalResults.insert(result, at: 0) // Prioritize movie match
+                    }
+                }
+            } catch {
+                print("NaaSongs: Smart search failed: \(error)")
+            }
+        }
+        
+        return finalResults
+    }
+    
+    // Internal helper for raw scraping
+    private func performNaaSearch(term: String) async throws -> [NaaSearchResult] {
+        guard let encodedQuery = term.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://naasongs.com.co/?s=\(encodedQuery)") else {
             throw URLError(.badURL)
         }
@@ -67,12 +145,11 @@ class NaaSongsService {
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
               let html = String(data: data, encoding: .utf8) else {
-            print("NaaSongs: Failed to get Search HTML or response")
+            print("NaaSongs: Failed to get Search HTML for \(term)")
             throw URLError(.badServerResponse)
         }
         
-        print("NaaSongs: Search status \(httpResponse.statusCode), body length: \(html.count)")
-        
+        print("NaaSongs: Raw Search for '\(term)' status \(httpResponse.statusCode)")
         let doc = try SwiftSoup.parse(html)
         return try parseArticles(from: doc)
     }

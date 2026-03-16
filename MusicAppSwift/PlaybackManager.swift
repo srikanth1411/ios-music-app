@@ -19,9 +19,12 @@ class PlaybackManager: ObservableObject {
     @Published var shuffleMode: ShuffleMode = .off
     @Published var repeatMode: RepeatMode = .off
     @Published var permissionsAuthorized: Bool = false
+    @Published var queue: [Song] = []
+    @Published var sleepTimerRemaining: TimeInterval? = nil
     
     private var player: AVPlayer?
     private var timeObserver: Any?
+    private var sleepTimer: Timer?
     private var isAccessingResource: Bool = false
     private var kvoObservers: [NSKeyValueObservation] = []
     
@@ -166,7 +169,10 @@ class PlaybackManager: ObservableObject {
         #endif
     }
     
-    func play(song: Song) {
+    func play(song: Song, queue: [Song]? = nil) {
+        if let newQueue = queue {
+            self.queue = newQueue
+        }
         // Re-confirm Audio Session is active before transitioning songs in the background
         #if os(iOS)
         do {
@@ -192,25 +198,25 @@ class PlaybackManager: ObservableObject {
         var localPlayURL: URL? = nil
         let tempFile = FileManager.default.temporaryDirectory.appendingPathComponent(song.fileURL.lastPathComponent)
         
-        // CRITICAL FIX: The parent folder was given security scope in LibraryStore, but this individual
-        // fileURL might return false for startAccessingSecurityScopedResource. If we skip the sandbox copy, 
-        // iOS will severely terminate our access to this external file when the app enters the background. 
-        // Therefore, we MUST copy it immediately into our sandbox regardless of what startAccessing... returns.
+        let accessed = song.fileURL.isFileURL ? song.fileURL.startAccessingSecurityScopedResource() : false
         
-        let accessed = song.fileURL.startAccessingSecurityScopedResource()
-        
-        do {
-            if FileManager.default.fileExists(atPath: tempFile.path) {
-                try FileManager.default.removeItem(at: tempFile)
+        if song.fileURL.isFileURL {
+            do {
+                if FileManager.default.fileExists(atPath: tempFile.path) {
+                    try FileManager.default.removeItem(at: tempFile)
+                }
+                try FileManager.default.copyItem(at: song.fileURL, to: tempFile)
+                localPlayURL = tempFile
+                temporaryFileURL = tempFile
+                print("Successfully forced copy of local file to sandbox")
+            } catch {
+                print("Failed to force copy file to local sandbox: \(error)")
+                localPlayURL = song.fileURL
             }
-            try FileManager.default.copyItem(at: song.fileURL, to: tempFile)
-            localPlayURL = tempFile
-            temporaryFileURL = tempFile
-            print("Successfully forced copy of file to local sandbox")
-        } catch {
-            print("Failed to force copy file to local sandbox: \(error)")
-            // Fallback to direct URL (highly likely to fail in background, but prevents foreground crash)
+        } else {
+            // Remote URL
             localPlayURL = song.fileURL
+            print("Playing remote stream: \(song.fileURL)")
         }
         
         if accessed {
@@ -352,26 +358,29 @@ class PlaybackManager: ObservableObject {
     }
     
     func playNext(auto: Bool = false) {
-        let library = LibraryStore.shared.songs
-        guard !library.isEmpty else { return }
+        let currentQueue = queue.isEmpty ? LibraryStore.shared.songs : queue
+        guard !currentQueue.isEmpty else { return }
         
         if shuffleMode == .on {
-            if let randomSong = library.filter({ $0.id != currentSong?.id }).randomElement() ?? library.randomElement() {
+            if let randomSong = currentQueue.filter({ $0.id != currentSong?.id }).randomElement() ?? currentQueue.randomElement() {
                 play(song: randomSong)
             }
             return
         }
         
-        guard let current = currentSong, let index = library.firstIndex(where: { $0.id == current.id }) else {
-            if let first = library.first { play(song: first) }
+        guard let current = currentSong,
+              let index = currentQueue.firstIndex(where: { $0.id == current.id || ($0.title == current.title && $0.album == current.album) }) else {
+            if let first = currentQueue.first { play(song: first) }
             return
         }
         
         let nextIndex = index + 1
-        if nextIndex < library.count {
-            play(song: library[nextIndex])
-        } else if repeatMode == .all || !auto {
-            if let first = library.first { play(song: first) }
+        if nextIndex < currentQueue.count {
+            play(song: currentQueue[nextIndex])
+        } else if repeatMode == .all || (!auto && queue.isEmpty) {
+            // If it's a manual "next" and we have no queue, loop to start of library
+            // If it's an album queue, we might want to stop at the end unless repeat is ON
+            if let first = currentQueue.first { play(song: first) }
         } else {
             pause()
             currentTime = 0
@@ -385,15 +394,15 @@ class PlaybackManager: ObservableObject {
             return
         }
         
-        let library = LibraryStore.shared.songs
-        guard !library.isEmpty, let current = currentSong,
-              let index = library.firstIndex(where: { $0.id == current.id }) else { return }
+        let currentQueue = queue.isEmpty ? LibraryStore.shared.songs : queue
+        guard !currentQueue.isEmpty, let current = currentSong,
+              let index = currentQueue.firstIndex(where: { $0.id == current.id }) else { return }
         
         let prevIndex = index - 1
         if prevIndex >= 0 {
-            play(song: library[prevIndex])
+            play(song: currentQueue[prevIndex])
         } else {
-            if let last = library.last { play(song: last) }
+            if let last = currentQueue.last { play(song: last) }
         }
     }
     
@@ -441,5 +450,28 @@ class PlaybackManager: ObservableObject {
             self?.currentTime = time.seconds
             // We don't update NowPlaying here too frequently to avoid performance issues
         }
+    }
+    
+    func setSleepTimer(minutes: Int) {
+        cancelSleepTimer()
+        let seconds = Double(minutes) * 60
+        sleepTimerRemaining = seconds
+        
+        sleepTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self, let remaining = self.sleepTimerRemaining else { return }
+            
+            if remaining <= 1 {
+                self.pause()
+                self.cancelSleepTimer()
+            } else {
+                self.sleepTimerRemaining = remaining - 1
+            }
+        }
+    }
+    
+    func cancelSleepTimer() {
+        sleepTimer?.invalidate()
+        sleepTimer = nil
+        sleepTimerRemaining = nil
     }
 }

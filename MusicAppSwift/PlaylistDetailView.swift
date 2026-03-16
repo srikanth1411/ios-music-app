@@ -11,6 +11,9 @@ struct PlaylistDetailView: View {
         }
     }
     
+    @State private var selectedSongForPlaylist: Song?
+    @State private var showingAddToPlaylist = false
+    
     var body: some View {
         List {
             Section {
@@ -37,7 +40,8 @@ struct PlaylistDetailView: View {
                         HStack(spacing: 20) {
                             Button(action: {
                                 if let first = playlistSongs.first {
-                                    playback.play(song: first)
+                                    playback.shuffleMode = .off
+                                    playback.play(song: first, queue: playlistSongs)
                                 }
                             }) {
                                 Label("Play", systemImage: "play.fill")
@@ -49,8 +53,12 @@ struct PlaylistDetailView: View {
                             
                             Button(action: {
                                 // Shuffle play
-                                if let shuffled = playlistSongs.shuffled().first {
-                                    playback.play(song: shuffled)
+                                if !playlistSongs.isEmpty {
+                                    let shuffled = playlistSongs.shuffled()
+                                    if let first = shuffled.first {
+                                        playback.shuffleMode = .on
+                                        playback.play(song: first, queue: shuffled)
+                                    }
                                 }
                             }) {
                                 Label("Shuffle", systemImage: "shuffle")
@@ -70,7 +78,8 @@ struct PlaylistDetailView: View {
             
             ForEach(playlistSongs) { song in
                 Button(action: {
-                    playback.play(song: song)
+                    playback.shuffleMode = .off
+                    playback.play(song: song, queue: playlistSongs)
                 }) {
                     HStack {
                         VStack(alignment: .leading) {
@@ -95,11 +104,30 @@ struct PlaylistDetailView: View {
                         Label("Remove", systemImage: "trash")
                     }
                 }
+                .contextMenu {
+                    Button(action: {
+                        selectedSongForPlaylist = song
+                        showingAddToPlaylist = true
+                    }) {
+                        Label("Add to a Playlist...", systemImage: "plus.circle")
+                    }
+                    
+                    Button(role: .destructive, action: {
+                        library.removeSongFromPlaylist(songID: song.id, playlistID: playlist.id)
+                    }) {
+                        Label("Remove from this Playlist", systemImage: "trash")
+                    }
+                }
             }
         }
         .navigationTitle(playlist.name)
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
+        .sheet(isPresented: $showingAddToPlaylist) {
+            if let song = selectedSongForPlaylist {
+                AddToPlaylistView(song: song)
+            }
+        }
     }
 }

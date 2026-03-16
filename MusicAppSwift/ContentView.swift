@@ -36,7 +36,9 @@ struct MiniPlayer: View {
             }
             .padding(.trailing, 10)
             
-            Button(action: {}) {
+            Button(action: {
+                playback.playNext()
+            }) {
                 Image(systemName: "forward.fill")
                     .font(.title2)
                     .foregroundColor(.primary)
@@ -54,6 +56,7 @@ struct MiniPlayer: View {
 struct ContentView: View {
     @StateObject var playback = PlaybackManager.shared
     @State private var showFullPlayer = false
+    @State private var showingAddToPlaylist = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -86,6 +89,21 @@ struct ContentView: View {
                 }
                 .transition(.move(edge: .bottom))
                 .offset(y: -50) // Adjust based on TabView height
+                .contextMenu {
+                    if let currentSong = playback.currentSong {
+                        Button(action: {
+                            showingAddToPlaylist = true
+                        }) {
+                            Label("Add to a Playlist...", systemImage: "plus.circle")
+                        }
+                        
+                        Button(action: {
+                            showFullPlayer = true
+                        }) {
+                            Label("Open Player", systemImage: "music.note")
+                        }
+                    }
+                }
             }
             
             if !playback.permissionsAuthorized {
@@ -132,6 +150,11 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showFullPlayer) {
             PlayerView()
+        }
+        .sheet(isPresented: $showingAddToPlaylist) {
+            if let song = playback.currentSong {
+                AddToPlaylistView(song: song)
+            }
         }
     }
 }
