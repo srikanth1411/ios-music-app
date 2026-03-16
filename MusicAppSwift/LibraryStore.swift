@@ -15,21 +15,31 @@ class LibraryStore: ObservableObject {
     private var folderWatcher: DispatchSourceFileSystemObject?
     
     var downloadedSongs: [Song] {
-        return songs.filter { $0.fileURL.path.contains("/Documents/Downloads/") }
+        return songs.filter { $0.fileURL.path.contains("/Documents/Music/") }
     }
     
     // Internal directory for downloaded songs
     var downloadsFolder: URL {
         let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        let downloadsPath = paths[0].appendingPathComponent("Downloads", isDirectory: true)
+        let musicPath = paths[0].appendingPathComponent("Music", isDirectory: true)
         
-        if !FileManager.default.fileExists(atPath: downloadsPath.path) {
-            try? FileManager.default.createDirectory(at: downloadsPath, withIntermediateDirectories: true)
+        if !FileManager.default.fileExists(atPath: musicPath.path) {
+            try? FileManager.default.createDirectory(at: musicPath, withIntermediateDirectories: true)
         }
-        return downloadsPath
+        return musicPath
+    }
+    
+    // Internal directory for artwork
+    var artFolder: URL {
+        let artPath = downloadsFolder.appendingPathComponent("Art", isDirectory: true)
+        if !FileManager.default.fileExists(atPath: artPath.path) {
+            try? FileManager.default.createDirectory(at: artPath, withIntermediateDirectories: true)
+        }
+        return artPath
     }
     
     private init() {
+        migrateLegacyDownloads()
         loadPlaylists()
         loadRecentAlbums()
         loadFolderBookmark()
@@ -132,11 +142,17 @@ class LibraryStore: ObservableObject {
             if ["mp3", "m4a", "wav", "aac"].contains(pathExtension) {
                 var artworkURL: URL? = nil
                 
-                // Check if a corresponding .jpg exists for this song (common for downloads)
+                // Check if a corresponding .jpg exists for this song in the Art subfolder
                 let artworkFilename = fileURL.lastPathComponent.replacingOccurrences(of: ".\(pathExtension)", with: ".jpg", options: .caseInsensitive)
-                let potentialArtwork = fileURL.deletingLastPathComponent().appendingPathComponent(artworkFilename)
+                let potentialArtwork = artFolder.appendingPathComponent(artworkFilename)
                 if FileManager.default.fileExists(atPath: potentialArtwork.path) {
                     artworkURL = potentialArtwork
+                } else {
+                    // Fallback to same directory (legacy support)
+                    let fallbackArtwork = fileURL.deletingLastPathComponent().appendingPathComponent(artworkFilename)
+                    if FileManager.default.fileExists(atPath: fallbackArtwork.path) {
+                        artworkURL = fallbackArtwork
+                    }
                 }
                 
                 let song = Song(
@@ -234,6 +250,34 @@ class LibraryStore: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: recentAlbumsKey),
            let decoded = try? JSONDecoder().decode([NaaSearchResult].self, from: data) {
             self.recentlyPlayedAlbums = decoded
+        }
+    }
+    
+    private func migrateLegacyDownloads() {
+        let fileManager = FileManager.default
+        let paths = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
+        let legacyDownloadsPath = paths[0].appendingPathComponent("Downloads", isDirectory: true)
+        
+        guard fileManager.fileExists(atPath: legacyDownloadsPath.path) else { return }
+        
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: legacyDownloadsPath, includingPropertiesForKeys: nil)
+            for item in contents {
+                let destination: URL
+                if item.pathExtension.lowercased() == "jpg" {
+                    destination = artFolder.appendingPathComponent(item.lastPathComponent)
+                } else {
+                    destination = downloadsFolder.appendingPathComponent(item.lastPathComponent)
+                }
+                
+                if !fileManager.fileExists(atPath: destination.path) {
+                    try fileManager.moveItem(at: item, to: destination)
+                    print("Migrated: \(item.lastPathComponent) -> \(destination.lastPathComponent)")
+                }
+            }
+            // Optional: try? fileManager.removeItem(at: legacyDownloadsPath)
+        } catch {
+            print("Migration error: \(error)")
         }
     }
 }

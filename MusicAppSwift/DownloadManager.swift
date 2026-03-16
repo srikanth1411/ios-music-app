@@ -102,7 +102,7 @@ extension DownloadManager: URLSessionDownloadDelegate {
         guard let songID = artworkTasks[downloadTask.taskIdentifier],
               let download = activeDownloads[songID] else { return }
         
-        let destinationURL = LibraryStore.shared.downloadsFolder.appendingPathComponent("\(download.song.title).jpg")
+        let destinationURL = LibraryStore.shared.artFolder.appendingPathComponent("\(download.song.title).jpg")
         
         do {
             if FileManager.default.fileExists(atPath: destinationURL.path) {
