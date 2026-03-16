@@ -31,6 +31,26 @@ struct OfflineSongsView: View {
                             playback.play(song: song)
                         }) {
                             HStack {
+                                // Artwork Thumbnail
+                                if let artworkURL = song.artworkURL {
+                                    AsyncImage(url: artworkURL) { phase in
+                                        if let image = phase.image {
+                                            image.resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                        } else {
+                                            Rectangle().fill(Color.gray.opacity(0.2))
+                                        }
+                                    }
+                                    .frame(width: 44, height: 44)
+                                    .cornerRadius(4)
+                                } else {
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.1))
+                                        .frame(width: 44, height: 44)
+                                        .cornerRadius(4)
+                                        .overlay(Image(systemName: "music.note").foregroundColor(.gray))
+                                }
+                                
                                 VStack(alignment: .leading) {
                                     Text(song.title)
                                         .font(.headline)

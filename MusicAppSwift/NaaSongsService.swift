@@ -19,11 +19,13 @@ struct NaaSong: Identifiable, Codable {
     let id: UUID
     let title: String
     let downloadUrl: String
+    let artworkUrl: String?
     
-    init(id: UUID = UUID(), title: String, downloadUrl: String) {
+    init(id: UUID = UUID(), title: String, downloadUrl: String, artworkUrl: String? = nil) {
         self.id = id
         self.title = title
         self.downloadUrl = downloadUrl
+        self.artworkUrl = artworkUrl
     }
 }
 
@@ -126,6 +128,15 @@ class NaaSongsService {
         let doc = try SwiftSoup.parse(html)
         var songs: [NaaSong] = []
         
+        let albumArtwork: String?
+        if let imgTag = try doc.select("img.wp-post-image").first() {
+            albumArtwork = try imgTag.attr("src")
+        } else if let imgTag = try doc.select("img").first() {
+            albumArtwork = try imgTag.attr("src")
+        } else {
+            albumArtwork = nil
+        }
+        
         let aTags = try doc.select("a")
         print("NaaSongs: Found \(aTags.size()) total links on album page")
         
@@ -165,7 +176,7 @@ class NaaSongsService {
                     continue
                 }
                 
-                let song = NaaSong(title: title.trimmingCharacters(in: .whitespacesAndNewlines), downloadUrl: href)
+                let song = NaaSong(title: title.trimmingCharacters(in: .whitespacesAndNewlines), downloadUrl: href, artworkUrl: albumArtwork)
                 // Filter out exact duplicates based on title/url segment
                 if !songs.contains(where: { $0.title == song.title || $0.downloadUrl == song.downloadUrl }) {
                     songs.append(song)

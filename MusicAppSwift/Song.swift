@@ -32,16 +32,18 @@ struct Song: Identifiable, Codable {
     let artist: String
     let album: String
     let fileURL: URL
+    let artworkURL: URL?
     let duration: TimeInterval
     
     // We'll handle artwork via a helper or at the UI layer to avoid Model-level UI framework dependencies
     
-    init(id: UUID = UUID(), title: String, artist: String = "Unknown Artist", album: String = "Unknown Album", fileURL: URL, duration: TimeInterval = 0) {
+    init(id: UUID = UUID(), title: String, artist: String = "Unknown Artist", album: String = "Unknown Album", fileURL: URL, artworkURL: URL? = nil, duration: TimeInterval = 0) {
         self.id = id
         self.title = title
         self.artist = artist
         self.album = album
         self.fileURL = fileURL
+        self.artworkURL = artworkURL
         self.duration = duration
     }
 }

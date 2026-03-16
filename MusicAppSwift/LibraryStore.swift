@@ -130,9 +130,21 @@ class LibraryStore: ObservableObject {
         for case let fileURL as URL in enumerator {
             let pathExtension = fileURL.pathExtension.lowercased()
             if ["mp3", "m4a", "wav", "aac"].contains(pathExtension) {
-                let title = fileURL.deletingPathExtension().lastPathComponent
-                let stableID = UUID(stableFrom: fileURL.path)
-                let song = Song(id: stableID, title: title, fileURL: fileURL)
+                var artworkURL: URL? = nil
+                
+                // Check if a corresponding .jpg exists for this song (common for downloads)
+                let artworkFilename = fileURL.lastPathComponent.replacingOccurrences(of: ".\(pathExtension)", with: ".jpg", options: .caseInsensitive)
+                let potentialArtwork = fileURL.deletingLastPathComponent().appendingPathComponent(artworkFilename)
+                if FileManager.default.fileExists(atPath: potentialArtwork.path) {
+                    artworkURL = potentialArtwork
+                }
+                
+                let song = Song(
+                    id: UUID(stableFrom: fileURL.path),
+                    title: fileURL.deletingPathExtension().lastPathComponent,
+                    fileURL: fileURL,
+                    artworkURL: artworkURL
+                )
                 foundSongs.append(song)
             }
         }

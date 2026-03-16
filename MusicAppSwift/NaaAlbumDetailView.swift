@@ -11,6 +11,16 @@ struct NaaAlbumDetailView: View {
     
     var body: some View {
         List {
+            if !songs.isEmpty {
+                Section {
+                    Button(action: downloadAll) {
+                        Label("Download Entire Album", systemImage: "arrow.down.circle.fill")
+                            .font(.headline)
+                            .foregroundColor(.pink)
+                    }
+                }
+            }
+            
             if isLoading {
                 HStack {
                     Spacer()
@@ -27,18 +37,39 @@ struct NaaAlbumDetailView: View {
             } else {
                 ForEach(songs) { song in
                     HStack {
-                        Button(action: {
-                            playNaaSong(song)
-                        }) {
-                            VStack(alignment: .leading) {
-                                Text(song.title)
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                
-                                Text("Online Stream")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                        // Artwork Thumbnail
+                        if let artworkUrlString = song.artworkUrl, let artworkUrl = URL(string: artworkUrlString) {
+                            AsyncImage(url: artworkUrl) { phase in
+                                if let image = phase.image {
+                                    image.resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } else {
+                                    Rectangle().fill(Color.gray.opacity(0.2))
+                                }
                             }
+                            .frame(width: 44, height: 44)
+                            .cornerRadius(4)
+                        } else {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.1))
+                                .frame(width: 44, height: 44)
+                                .cornerRadius(4)
+                                .overlay(Image(systemName: "music.note").foregroundColor(.gray))
+                        }
+                        
+                        VStack(alignment: .leading) {
+                            Text(song.title)
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Text(isSongDownloaded(song) ? "Downloaded" : "Online Stream")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            playNaaSong(song)
                         }
                         
                         Spacer()
@@ -52,6 +83,7 @@ struct NaaAlbumDetailView: View {
                                 .padding(.leading, 8)
                         }
                     }
+                    .padding(.vertical, 4)
                 }
             }
         }
@@ -59,6 +91,14 @@ struct NaaAlbumDetailView: View {
         .onAppear {
             loadSongs()
             LibraryStore.shared.addToRecentlyPlayed(album: albumResult)
+        }
+    }
+    
+    private func downloadAll() {
+        for song in songs {
+            if !isSongDownloaded(song) {
+                DownloadManager.shared.download(song)
+            }
         }
     }
     
@@ -160,14 +200,20 @@ struct NaaAlbumDetailView: View {
         }
     }
     
+    private func isSongDownloaded(_ naaSong: NaaSong) -> Bool {
+        LibraryStore.shared.songs.contains { $0.title == naaSong.title }
+    }
+    
     private func playNaaSong(_ naaSong: NaaSong) {
+        // Check if already downloaded
+        if let localSong = LibraryStore.shared.songs.first(where: { $0.title == naaSong.title }) {
+            playback.play(song: localSong)
+            return
+        }
+        
         guard let url = URL(string: naaSong.downloadUrl) else { return }
         
-        // We temporarily create a pseudo-Song object with the remote URL to feed to the PlaybackManager
-        // Since Song id usually expects a stable local UUID, we'll generate one
         let newSong = Song(id: UUID(), title: naaSong.title, fileURL: url)
-        
-        // Our existing PlaybackManager expects URL streams to work fine since AVPlayer handles it transparently
         playback.play(song: newSong)
     }
 }

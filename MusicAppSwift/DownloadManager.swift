@@ -21,6 +21,8 @@ class DownloadManager: NSObject, ObservableObject {
     
     private var urlSession: URLSession!
     private var tasks: [Int: UUID] = [:] // mapping sessionTaskID to songID
+    private var artworkTasks: [Int: UUID] = [:] // mapping sessionTaskID to songID for artwork
+    
     
     private override init() {
         super.init()
@@ -43,11 +45,23 @@ class DownloadManager: NSObject, ObservableObject {
         let downloadTask = urlSession.downloadTask(with: url)
         tasks[downloadTask.taskIdentifier] = songID
         downloadTask.resume()
+        
+        // Also download artwork if available
+        if let artworkUrlString = song.artworkUrl, let artworkUrl = URL(string: artworkUrlString) {
+            let artworkTask = urlSession.downloadTask(with: artworkUrl)
+            artworkTasks[artworkTask.taskIdentifier] = songID
+            artworkTask.resume()
+        }
     }
 }
 
 extension DownloadManager: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        if artworkTasks[downloadTask.taskIdentifier] != nil {
+            handleArtworkDownload(downloadTask: downloadTask, location: location)
+            return
+        }
+        
         guard let songID = tasks[downloadTask.taskIdentifier],
               var download = activeDownloads[songID] else { return }
         
@@ -81,6 +95,26 @@ extension DownloadManager: URLSessionDownloadDelegate {
         }
         
         tasks.removeValue(forKey: downloadTask.taskIdentifier)
+    }
+    
+    // Artwork handling
+    private func handleArtworkDownload(downloadTask: URLSessionDownloadTask, location: URL) {
+        guard let songID = artworkTasks[downloadTask.taskIdentifier],
+              let download = activeDownloads[songID] else { return }
+        
+        let destinationURL = LibraryStore.shared.downloadsFolder.appendingPathComponent("\(download.song.title).jpg")
+        
+        do {
+            if FileManager.default.fileExists(atPath: destinationURL.path) {
+                try FileManager.default.removeItem(at: destinationURL)
+            }
+            try FileManager.default.moveItem(at: location, to: destinationURL)
+            print("Artwork saved to \(destinationURL.path)")
+        } catch {
+            print("Artwork download error: \(error)")
+        }
+        
+        artworkTasks.removeValue(forKey: downloadTask.taskIdentifier)
     }
     
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
